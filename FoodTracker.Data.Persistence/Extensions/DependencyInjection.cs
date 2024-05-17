@@ -2,6 +2,7 @@
 using FoodTracker.Contracts.DataProvider;
 using FoodTracker.Contracts.Persistence;
 using FoodTracker.Data.Persistence.Context;
+using FoodTracker.Data.Persistence.Entities.User;
 using FoodTracker.Data.Persistence.Repositories;
 using FoodTracker.Provider.VoedingCentrum;
 using Microsoft.EntityFrameworkCore;
@@ -19,11 +20,12 @@ public static class DependencyInjection
         provider.AddScoped<IProductTrackerRepository, ProductTrackerRepository>();
         provider.AddScoped<ISettingsRepository, UserSettingsRepository>();
 
-        provider.AddDbContext<VoedingDbContext>(
-                opt => opt.UseSqlServer(config.GetConnectionString("Store"))
-            );
-        provider.AddDbContext<VoedingIdentityContext>(
-                opt => opt.UseSqlServer(config.GetConnectionString("Identity"))
+        provider
+            .AddIdentityCore<User>()
+            .AddEntityFrameworkStores<FoodTrackerDbContext>();
+                
+        provider.AddDbContext<FoodTrackerDbContext>(
+                opt => opt.UseSqlServer(config.GetConnectionString("FoodTrackerDb"))
             );
     }
 

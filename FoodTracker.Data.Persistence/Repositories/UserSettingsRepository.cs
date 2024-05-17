@@ -10,9 +10,9 @@ namespace FoodTracker.Data.Persistence.Repositories;
 
 internal class UserSettingsRepository : ISettingsRepository
 {
-    private readonly VoedingDbContext _context;
+    private readonly FoodTrackerDbContext _context;
 
-    public UserSettingsRepository(VoedingDbContext context)
+    public UserSettingsRepository(FoodTrackerDbContext context)
     {
         _context = context;
     }
