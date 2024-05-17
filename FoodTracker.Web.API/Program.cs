@@ -30,7 +30,6 @@ public class Program
         builder.Services.AddVoedingLib(configuration);
 
         builder.Services.AddIdentityCore<User>()
-            .AddEntityFrameworkStores<VoedingIdentityContext>()
             .AddSignInManager()
             .AddDefaultTokenProviders();
 

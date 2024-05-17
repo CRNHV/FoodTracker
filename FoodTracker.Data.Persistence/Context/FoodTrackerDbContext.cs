@@ -1,18 +1,15 @@
 ﻿using FoodTracker.Data.Persistence.Entities.Product;
 using FoodTracker.Data.Persistence.Entities.ProductTracking;
 using FoodTracker.Data.Persistence.Entities.User;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 
 namespace FoodTracker.Data.Persistence.Context;
 
-internal sealed class VoedingDbContext : DbContext
+internal class FoodTrackerDbContext : IdentityDbContext<User, Role, int>
 {
-    public VoedingDbContext(DbContextOptions<VoedingDbContext> opt) : base(opt)
-    {
-    }
-
-    public VoedingDbContext() : base(new DbContextOptionsBuilder().UseSqlServer("Server=Ucci-PC\\SQLEXPRESS;Database=Voeding.Store;Trusted_Connection=True;Encrypt=False").Options)
+    public FoodTrackerDbContext(DbContextOptions<FoodTrackerDbContext> options) : base(options)
     {
     }
 
@@ -25,6 +22,8 @@ internal sealed class VoedingDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<ProductEntity>()
             .HasOne(p => (ProductInfoEntity)p.ProductInfo)
             .WithOne()

@@ -12,9 +12,9 @@ namespace FoodTracker.Data.Persistence.Repositories;
 
 internal class ProductTrackerRepository : IProductTrackerRepository
 {
-    private readonly VoedingDbContext _context;
+    private readonly FoodTrackerDbContext _context;
 
-    public ProductTrackerRepository(VoedingDbContext context)
+    public ProductTrackerRepository(FoodTrackerDbContext context)
     {
         _context = context;
     }

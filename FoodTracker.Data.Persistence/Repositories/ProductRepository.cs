@@ -13,10 +13,10 @@ namespace FoodTracker.Data.Persistence.Repositories;
 
 internal sealed class ProductRepository : IProductRepository
 {
-    private readonly VoedingDbContext _context;
+    private readonly FoodTrackerDbContext _context;
     private readonly IFoodDataProvider _foodDataApi;
 
-    public ProductRepository(VoedingDbContext context, IFoodDataProvider foodDataApi)
+    public ProductRepository(FoodTrackerDbContext context, IFoodDataProvider foodDataApi)
     {
         _context = context;
         _foodDataApi = foodDataApi;

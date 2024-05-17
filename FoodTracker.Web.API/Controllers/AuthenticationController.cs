@@ -119,6 +119,7 @@ public sealed class AuthenticationController : ControllerBase
             return Unauthorized();
         }
 
+        await _userManager.AddClaimAsync(createdUser, new Claim(ClaimTypes.Role, "user"));
         await _userManager.AddClaimAsync(createdUser, new Claim(ClaimTypes.Name, newUser.UserName));
         await _userManager.AddClaimAsync(createdUser, new Claim(ClaimTypes.NameIdentifier, newUser.Id.ToString()));
         return Ok();
