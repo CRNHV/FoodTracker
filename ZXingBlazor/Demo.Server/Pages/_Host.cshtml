@@ -1,0 +1,55 @@
+﻿@page "/"
+@namespace Demo.Server.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZXingBlazor Demo.Server</title>
+    <base href="~/" />
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link href="css/site.css" rel="stylesheet" />
+    <link href="Demo.Server.styles.css" rel="stylesheet" />
+</head>
+<body>
+    <app>
+        <component type="typeof(App)" render-mode="ServerPrerendered" />
+    </app>
+
+    <div id="blazor-error-ui">
+        <environment include="Staging,Production">
+            An error has occurred. This application may no longer respond until reloaded.
+        </environment>
+        <environment include="Development">
+            An unhandled exception has occurred. See browser dev tools for details.
+        </environment>
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <script src="_framework/blazor.server.js"></script>
+       <script>
+        //Blazor-断开连接后重新加载浏览器
+        // 等待直到出现“重新加载”按钮
+        new MutationObserver((mutations, observer) => {
+            console.log('查看服务器');
+            if (document.querySelector('#components-reconnect-modal h5 a')) {
+                // 现在，每隔10秒，查看服务器是否返回，如果返回，则重新加载
+                async function attemptReload() {
+                    console.log('检查服务器是否真的返回');
+                    await fetch(''); // 检查服务器是否真的返回
+                    location.reload();
+                }
+                observer.disconnect();
+                attemptReload();
+                setInterval(attemptReload, 10000);
+            }
+        }).observe(document.body, { childList: true, subtree: true });
+    </script>
+</body>
+</html>

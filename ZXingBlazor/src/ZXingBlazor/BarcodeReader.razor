@@ -1,0 +1,35 @@
+﻿@namespace ZXingBlazor.Components
+
+@if (UseBuiltinDiv)
+{
+    <div class="card">
+        <!-- Edit form for the current item -->
+        <div @ref="Element">
+            <div data-action="sourceSelectPanel" style="display:none">
+                <label for="sourceSelect">@SelectDeviceBtnTitle:</label>
+                <select data-action="sourceSelect" style="max-width:100%" class="form-select form-control">
+                </select>
+            </div>
+            <div>
+                <video data-action="video"
+                       id="video"
+                       muted
+                       webkit-playsinline
+                       playsinline
+                       x-webkit-airplay="allow"
+                       x5-video-player-type="h5"
+                       x5-video-player-fullscreen="true"
+                       x5-video-orientation="portraint"></video>
+            </div>
+
+            <div class="field is-grouped">
+                <div class="control is-expanded">
+                    <button class="button is-dark has-text-success is-fullwidth" data-action="startButton">@ScanBtnTitle</button>
+                </div>
+                <div class="control is-expanded">
+                    <button class="button is-dark has-text-success is-fullwidth" data-action="closeButton">@CloseBtnTitle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

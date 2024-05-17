@@ -1,0 +1,134 @@
+﻿@page "/"
+@using FoodTracker.Data.Domain.Application.ProductTracking
+@using FoodTracker.Data.Domain.Application.Product
+@using FoodTracker.Data.Domain.Application.User
+@using FoodTracker.Data.Domain.Persistence.ProductTracking;
+@using FoodTracker.Web.UI.Models.Product
+@using FoodTracker.Web.UI.Models.Settings
+@using FoodTracker.Web.UI.Services.Settings
+
+@inject IHttpClientFactory ClientFactory;
+@inject ISettingsService settings;
+
+<div class="container is-desktop is-mobile">
+    <h1 class="title">Today's nutrient intake</h1>
+    @if (TrackedMeals is null)
+    {
+        <h2 class="title is-4">Loading your data...</h2>
+    }
+    else
+    {
+        @if (TrackedMeals.Count >= 1)
+        {
+            <table class="table is-fullwidth is-striped">
+                <thead>
+                    <tr>
+                        <th>Substance</th>
+                        <th>Intake</th>
+                        <th>Goal</th>
+                        <th>Left</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>Energy</th>
+                        <td>@energy</td>
+                        <th>@userSettings.EnergyGoal</th>
+                        <td>@energyLeft</td>
+                    </tr>
+                    <tr>
+                        <th>Protein</th>
+                        <td>@protein</td>
+                        <th>@userSettings.ProteinGoal</th>
+                        <td>@proteinLeft</td>
+                    </tr>
+                    <tr>
+                        <th>Fat</th>
+                        <td>@fat</td>
+                        <th>@userSettings.FatGoal</th>
+                        <td>@fatLeft</td>
+                    </tr>
+                    <tr>
+                        <th>Carbs</th>
+                        <td>@carbs</td>
+                        <th>@userSettings.CarbGoal</th>
+                        <td>@carbsLeft</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h1 class="title">Food eaten</h1>
+            <table class="table is-fullwidth is-striped">
+                <thead>
+                    <tr>
+                        <th>Food name</th>
+                        <th>Quantity</th>
+                        <th>Added timestamp</th>
+                    </tr>
+                </thead>
+                @foreach (var meal in TrackedMeals)
+                {
+                    <tbody>
+                        <tr>
+                            <th>@meal.Product.ProductName</th>
+                            <th>@meal.Quantity</th>
+                            <th>@meal.CreatedOnUtc.ToShortDateString()</th>
+                        </tr>
+                    </tbody>
+                }
+            </table>
+        }
+        else
+        {
+            <h2 class="title is-4">No data found, try adding some!</h2>
+        }
+    }
+</div>
+@code {
+    private HttpClient Client;
+    private ICollection<TrackedProductModel>? TrackedMeals;
+    private IUserSettings userSettings = new UserSettingsModel();
+
+    double energy = 0;
+    double protein = 0;
+    double fat = 0;
+    double carbs = 0;
+
+    double energyLeft = 0;
+    double proteinLeft = 0;
+    double fatLeft = 0;
+    double carbsLeft = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Client = ClientFactory.CreateClient("WebAPI");
+        var products = await Client.GetFromJsonAsync<ICollection<TrackedProductModel>>("food/list");
+        TrackedMeals = products ?? new List<TrackedProductModel>();
+
+        var settingsResult = await settings.GetForUserAsync();
+        userSettings = settingsResult.Data;
+
+        energyLeft = userSettings.EnergyGoal;
+        proteinLeft = userSettings.ProteinGoal;
+        fatLeft = userSettings.FatGoal;
+        carbsLeft = userSettings.CarbGoal;
+
+        foreach (var item in TrackedMeals)
+        {
+            energy += item.Product.ProductInfo.Energie.GetValueOrDefault(0);
+            protein += item.Product.ProductInfo.Eiwit.GetValueOrDefault(0);
+            fat += item.Product.ProductInfo.Vet.GetValueOrDefault(0);
+            carbs += item.Product.ProductInfo.Koolhydraten.GetValueOrDefault(0);
+        }
+
+        energyLeft -= energy;
+        proteinLeft -= protein;
+        fatLeft -= fat;
+        carbsLeft -= carbs;
+
+        energyLeft = energyLeft < 0 ? 0 : energyLeft;
+        proteinLeft = proteinLeft < 0 ? 0 : proteinLeft;
+        fatLeft = fatLeft < 0 ? 0 : fatLeft;
+        carbsLeft = carbsLeft < 0 ? 0 : carbsLeft;
+    }
+}

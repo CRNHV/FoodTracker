@@ -1,0 +1,62 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using FoodTracker.Web.UI.Models.Login
+@using FoodTracker.Web.UI.Services
+@inherits LayoutComponentBase
+@inject ILocalStorageService _localStorage;
+@inject NavigationManager navigationManager;
+
+<body>
+    <section class="hero is-link">
+        <div class="hero-body">
+            <div class="columns">
+                <div class="column is-12">
+                    <div class="container content">
+                        <a href="/" class="title">Food tracker</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="container">
+        <NavMenu></NavMenu>
+    </div>
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-12">
+                    @Body
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        window.addEventListener('resize', () => {
+            const divs = document.querySelectorAll(".menu-list");
+            if (window.innerWidth < 768) {
+                divs.forEach(div => div.classList.add("tags"));
+            }
+            else {
+                divs.forEach(div => div.classList.remove("tags"));
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            //The first argument are the elements to which the plugin shall be initialized
+            //The second argument has to be at least a empty object or a object with your desired options
+            OverlayScrollbars(document.querySelectorAll("body"), {});
+        });
+
+    </script>
+</body>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await _localStorage.GetItem<JwtToken>("token");
+        if (token == null || string.IsNullOrEmpty(token.Token))
+        {
+            navigationManager.NavigateTo("/Logout");
+        }
+    }
+}

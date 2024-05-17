@@ -1,0 +1,48 @@
+﻿@page "/logout"
+
+@using System.Text.Json
+@using Microsoft.AspNetCore.Components.Authorization
+@using FoodTracker.Web.UI.Layout
+@using FoodTracker.Web.UI.Models.Login
+@using FoodTracker.Web.UI.Services
+@using FoodTracker.Web.UI.Services.Login
+
+@attribute [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+
+@layout LoginLayout
+
+@inject NavigationManager manager;
+@inject ILocalStorageService _localStorageService;
+
+<div class="container is-desktop is-mobile" style="margin-top: 200px;">
+    <div class="columns is-centered is-multiline">
+        <div class="column is-9" style="text-align:center">
+            <div class="notification is-success is-centered has-text-center">
+                <h2 class="title">Thank you for being there!</h2>
+            </div>
+        </div>
+        <div class="column is-12 is-centered has-text-center is-narrow" style="text-align:center">
+            <img src="@gifLink" />
+            <p>You will be directed to the login screen soon.</p>
+        </div>
+    </div>
+</div>
+@code {
+    private string[] catGifs = new string[]
+    {
+        "https://gifdb.com/images/high/maine-coon-cat-crying-throwing-a-fit-6hzoxhtkjbakk26e.webp",
+        "https://i.giphy.com/nPUNFHxJZVNzN5pZC6.webp"
+    };
+
+    string gifLink = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var rng = new Random();
+
+        gifLink = catGifs[rng.Next(0, catGifs.Length)];
+        await _localStorageService.RemoveItem("token");
+        await Task.Delay(5000);
+        manager.NavigateTo("/", true);
+    }
+}

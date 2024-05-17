@@ -1,0 +1,23 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using FoodTracker.Web.UI.Layout
+@inject NavigationManager navMan;
+
+<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <AuthorizeView>
+            <Authorized>
+                <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+            </Authorized>
+            <NotAuthorized>
+                <FoodTracker.Web.UI.Pages.Login></FoodTracker.Web.UI.Pages.Login>
+            </NotAuthorized>
+        </AuthorizeView>
+    </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(LoginLayout)">
+            <h1 class="title">Sorry, there's nothing at this address.</h1>
+        </LayoutView>
+    </NotFound>
+</Router>
+

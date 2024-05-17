@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="FakesAssemblies\**" />
+	  <EmbeddedResource Remove="FakesAssemblies\**" />
+	  <None Remove="FakesAssemblies\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Azure.Identity" Version="1.11.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="8.0.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.5">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.5" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.5" />
+		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.5" />
+		<PackageReference Include="Microsoft.QualityTools.Testing.Fakes" Version="17.5.0-beta.23060.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <AdditionalDesignTimeBuildInput Remove="FakesAssemblies\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\FoodTracker.Contracts\FoodTracker.Contracts.csproj" />
+	  <ProjectReference Include="..\FoodTracker.Data.Domain\FoodTracker.Data.Domain.csproj" />
+	  <ProjectReference Include="..\FoodTracker.Providers.VoedingCentrum\FoodTracker.Provider.VoedingCentrum\FoodTracker.Provider.VoedingCentrum.csproj" />
+	</ItemGroup>
+
+</Project>

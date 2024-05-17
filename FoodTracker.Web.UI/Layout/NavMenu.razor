@@ -1,0 +1,52 @@
+﻿<nav class="navbar" role="navigation" aria-label="main navigation" id="prodinfo">
+
+    <a role="button" class="@NavbarBurgerClass" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample" @onclick="toggleMenu">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+    </a>
+    <div id="navbarBasicExample" class="@NavbarMenuClass">
+
+        <div class="navbar-start p-2">
+            <div class="navbar-item">
+                <a @onclick="toggleMenu" class="button is-dark has-text-success is-fullwidth" href="/">
+                    Home
+                </a>
+            </div>
+            <div class="navbar-item">
+                <a @onclick="toggleMenu" class="button is-dark has-text-success is-fullwidth" href="/track-food">
+                    Track food
+                </a>
+            </div>
+            <div class="navbar-item">
+                <a @onclick="toggleMenu" class="button is-dark has-text-success is-fullwidth" href="/total-intake">
+                    View food intake
+                </a>
+            </div>
+            <div class="navbar-item">
+                <a @onclick="toggleMenu" class="button is-dark has-text-success is-fullwidth" href="/settings">
+                    Settings
+                </a>
+            </div>
+            <div class="navbar-item">
+                <a @onclick="toggleMenu" class="button is-warning is-dark is-fullwidth" href="/logout">
+                    Log out
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+@code {
+    public bool MenuActive = false;
+    public string NavbarBurgerClass = "navbar-burger";
+    public string NavbarMenuClass = "navbar-menu";
+
+    private void toggleMenu(MouseEventArgs e)
+    {
+        MenuActive = !MenuActive;
+        NavbarMenuClass = MenuActive ? "navbar-menu is-active" : "navbar-menu";
+        NavbarBurgerClass = MenuActive ? "navbar-burger is-active" : "navbar-burger";
+    }
+}

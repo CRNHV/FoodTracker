@@ -1,0 +1,247 @@
+﻿@page "/track-food"
+
+@using FoodTracker.Data.Domain.Application.Product
+@using FoodTracker.Web.UI.Services.Home
+
+@inject IJSRuntime JS
+@inject IFoodTrackService service;
+
+<div class="container is-desktop is-mobile">
+    <div class="columns is-multiline">
+        @foreach (var Error in Errors)
+        {
+            <div class="column is-12">
+                <div class="notification is-warning">
+                    @Error
+                </div>
+            </div>
+        }
+        @if (ModalVisible)
+        {
+            <div class="modal is-active">
+                <div class="modal-background"></div>
+                <div class="modal-content">
+                    <BarcodeReader ScanBtnTitle="Start scanning"
+                                   CloseBtnTitle="Close"
+                                   ResetBtnTitle="Reset"
+                                   SelectDeviceBtnTitle="Select device"
+                                   ScanResult="(async (e) => await ScanResult(e))"
+                                   SaveDeviceID=true
+                                   Close="(()=>ToggleScanner())" />
+                </div>
+            </div>
+        }
+        <div class="container">
+            <div class="columns is-multiline">
+                @if (SelectedProduct != null)
+                {
+                    if (SelectedProduct.ProductInfo != null)
+                    {
+                        <div class="column is-12">
+
+                            <div class="notification is-primary is-dark" style="height: 100%">
+                                <h2 class="title">
+                                    Product info:
+                                </h2>
+                                <div class="field">
+                                    @if (string.IsNullOrEmpty(@SelectedProduct.BrandName))
+                                    {
+                                        <label class="label">Brand: Onbekend</label>
+                                    }
+                                    else
+                                    {
+                                        <label class="label">Brand: @SelectedProduct.BrandName</label>
+                                    }
+                                    <label class="label">Product name: @SelectedProduct.ProductName</label>
+                                    <br />
+                                    <label class="label">Energy: @SelectedProduct.ProductInfo.Energie</label>
+                                    <label class="label">Fat: @SelectedProduct.ProductInfo.Vet</label>
+                                    <label class="label">Of which saturated: @SelectedProduct.ProductInfo.VerzadigdVet</label>
+                                    <label class="label">Protein: @SelectedProduct.ProductInfo.Eiwit</label>
+                                    <label class="label">Of which plant based: @SelectedProduct.ProductInfo.EiwitPlantaardig</label>
+                                    <label class="label">Carbohydrates @SelectedProduct.ProductInfo.Koolhydraten</label>
+                                    <div class="control">
+                                        <button @onclick="() => AddToList(SelectedProduct)" class="button is-primary">Add to list</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                }
+                @if (EatenProdcuts.Count > 0)
+                {
+                    <div class="column is-12">
+
+                        <div class="card is-primary is-dark p-auto" style="height: 100%">
+                            <div class="card-content">
+                                <h2 class="title">
+                                    Food added just now:
+                                </h2>
+                                <table class="table is-fullwidth is-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Energy</th>
+                                            <th>Fat</th>
+                                            <th>Protein</th>
+                                            <th>Carbs</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var eatenProduct in EatenProdcuts)
+                                        {
+                                            if (eatenProduct.ProductInfo is null)
+                                            {
+                                                continue;
+                                            }
+
+                                            <tr class="field">
+                                                <td>@eatenProduct.ProductName</td>
+                                                <td>@eatenProduct.ProductInfo.Energie</td>
+                                                <td>@eatenProduct.ProductInfo.Vet</td>
+                                                <td>@eatenProduct.ProductInfo.Eiwit</td>
+                                                <td>@eatenProduct.ProductInfo.Koolhydraten</td>
+                                                <td>
+                                                    <button @onclick="() => RemoveFromList(eatenProduct)" class="button is-primary">Remove</button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="column is-12">
+            <article class="message is-primary">
+                <div class="field is-grouped-multiline ">
+                    <div class="control is-expanded">
+                        <input @bind-value="SearchFoodName" class="input has-text-white" type="text" placeholder="Food name">
+                    </div>
+                    <div class="@(IsLoading ? "control is-loading mt-3" : "control mt-3")">
+                        <button @onclick="ClickSearch" class="is-fullwidth button is-dark has-text-success">Search by name</button>
+                    </div>
+                    <div class="control mt-3">
+                        <button @onclick="ToggleScanner" class="is-fullwidth button is-dark has-text-success">Scan barcode</button>
+                    </div>
+                </div>
+            </article>
+        </div>
+        <div class="column is-12">
+            <table class="table is-fullwidth is-striped">
+                <thead>
+                    <tr>
+                        <th>Brand</th>
+                        <th>Name</th>
+                        <th>Select</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var searchResult in SearchResults)
+                    {
+                        <tr>
+                            @if (string.IsNullOrEmpty(searchResult.BrandName))
+                            {
+                                <td>Unknown</td>
+                            }
+                            else
+                            {
+                                <td>@searchResult.BrandName</td>
+                            }
+                            <td>@searchResult.ProductName</td>
+                            <td><button @onclick="() => ClickInfo(searchResult.Id)" class="button is-primary is-small">Select</button></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@code {
+    private string? SearchFoodName { get; set; }
+    private string? EanCode { get; set; }
+    private bool ModalVisible = false;
+    private bool IsLoading = false;
+
+    private ICollection<string> Errors { get; set; } = new List<string>();
+    private ICollection<ISearchResult> SearchResults { get; set; } = new List<ISearchResult>();
+    private IProduct? SelectedProduct { get; set; }
+    private ICollection<IProduct> EatenProdcuts { get; set; } = new List<IProduct>();
+
+    public async Task ClickSearch()
+    {
+        IsLoading = true;
+        var result = await service.SearchByNameAsync(SearchFoodName);
+        if (result.IsSuccess && result.Data != null)
+        {
+            SearchResults = result.Data.Where(x => !string.IsNullOrEmpty(x.BrandName)).ToList();
+            Errors.Clear();
+        }
+        else
+        {
+            Errors = result.Errors;
+        }
+        IsLoading = false;
+    }
+
+    public async Task SearchByEan(string eanCode)
+    {
+        var result = await service.SearchByEanAsync(eanCode);
+        if (result.IsSuccess && result.Data != null)
+        {
+            SelectedProduct = result.Data;
+            Errors.Clear();
+        }
+        else
+        {
+            Errors = result.Errors;
+        }
+    }
+
+    public async Task ClickInfo(string id)
+    {
+        var result = await service.SearchByIdAsync(id);
+        if (result.IsSuccess && result.Data != null)
+        {
+            SelectedProduct = result.Data;
+            Errors.Clear();
+        }
+        else
+        {
+            Errors = result.Errors;
+        }
+
+        var jsInProcess = (IJSInProcessRuntime)JS;
+        jsInProcess.InvokeVoid("smoothScrollTo", "prodinfo");
+    }
+
+    public async Task AddToList(IProduct productInfo)
+    {
+        await service.AddFoodToEatListAsync(productInfo);
+        EatenProdcuts.Add(productInfo);
+    }
+
+    public async Task RemoveFromList(IProduct productInfo)
+    {
+        await service.RemoveFoodFromEatListAsync(productInfo);
+        EatenProdcuts.Remove(productInfo);
+    }
+
+    public void ToggleScanner()
+    {
+        ModalVisible = !ModalVisible;
+    }
+
+    private async Task ScanResult(string e)
+    {
+        ToggleScanner();
+        if (!string.IsNullOrEmpty(e))
+        {
+            await SearchByEan(e);
+        }
+    }
+}

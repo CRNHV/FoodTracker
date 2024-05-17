@@ -1,0 +1,108 @@
+﻿@page "/total-intake"
+@using System.Globalization
+@using FoodTracker.Web.UI.Models.Product;
+
+@inject IHttpClientFactory factory;
+
+<div class="container is-desktop is-mobile">
+    <div class="columns is-multiline">
+        @if (ErrorMessage != null)
+        {
+            <div class="column is-12">
+                <div class="notification is-warning">
+                    @ErrorMessage
+                </div>
+            </div>
+        }
+
+        <div class="column is-12">
+
+            <form @onsubmit="Submit">
+                <div class="field is-grouped-multiline ">
+                    <div class="control is-expanded">
+                        <input @bind-value="SearchDate" class="input has-text-white" type="date" required>
+                    </div>
+                    <div class="control mt-3">
+                        <button type="submit" class="is-fullwidth button is-dark has-text-success">Filter by date</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="column is-12">
+            @if (products != null && products.Count > 0)
+            {
+                <table class="table is-fullwidth is-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Energy</th>
+                            <th>Protein</th>
+                            <th>Fat</th>
+                            <th>Carbs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in products)
+                        {
+                            <tr>
+                                <th>@item.Product.ProductName</th>
+                                <th>@double.Truncate(item.Product.ProductInfo.Energie.GetValueOrDefault(0))</th>
+                                <th>@double.Truncate(item.Product.ProductInfo.Eiwit.GetValueOrDefault(0))</th>
+                                <th>@double.Truncate(item.Product.ProductInfo.Vet.GetValueOrDefault(0))</th>
+                                <th>@double.Truncate(item.Product.ProductInfo.Koolhydraten.GetValueOrDefault(0))</th>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Total: </th>
+                            <th>@double.Truncate(TotalEnergy)</th>
+                            <th>@double.Truncate(TotalProtein)</th>
+                            <th>@double.Truncate(TotalFat)</th>
+                            <th>@double.Truncate(TotalCarbs)</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            }
+            else if (products != null && products.Count == 0)
+            {
+                <div class="notification is-success">
+                    There are no tracked meals for this date.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+@code {
+    private string? ErrorMessage { get; set; }
+    private DateTime SearchDate = DateTime.UtcNow;
+    private List<TrackedProductModel> products;
+
+    private HttpClient client;
+
+    private double TotalEnergy = 0;
+    private double TotalProtein = 0;
+    private double TotalFat = 0;
+    private double TotalCarbs = 0;
+
+    private async Task Submit(EventArgs e)
+    {
+        client = factory.CreateClient("WebAPI");
+        var results = await client.GetFromJsonAsync<List<TrackedProductModel>>($"/food/list/{SearchDate.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture)}");
+
+        if (results != null)
+        {
+            products = results;
+
+            foreach (var item in products)
+            {
+                var info = item.Product.ProductInfo;
+
+                TotalEnergy += info.Energie.GetValueOrDefault(0);
+                TotalProtein += info.Eiwit.GetValueOrDefault(0);
+                TotalFat += info.Vet.GetValueOrDefault(0);
+                TotalCarbs += info.Koolhydraten.GetValueOrDefault(0);
+            }
+        }
+    }
+}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Food tracker</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+    <script>
+        function smoothScrollTo(elementId) {
+            var element = document.getElementById(elementId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+            else {
+                console.log(elementId);
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <div id="app">
+        <div class="container is-desktop is-mobile" style="margin-top:100px;">
+            <h1 class="title">Loading...</h1>
+            <progress id="progressbar" class="progress is-link" value="0" max="100">
+            </progress>
+        </div>
+    </div>
+    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
+    <script>navigator.serviceWorker.register('service-worker.js');</script>
+    <script>
+        function StartBlazor() {
+            let loadedCount = 0;
+            let allRessources = 0;
+            Blazor.start({
+                // This function gets called by the Blazor pipeline
+                loadBootResource:
+                    function (type, filename, defaultUri, integrity) {
+                        if (type === "dotnetjs")
+                            return defaultUri;
+
+                        // As "fetchResources" is a promise we don't block
+                        const fetchResources = fetch(defaultUri, {
+                            integrity: integrity,
+                            cache: 'no-cache'
+                        });
+
+                        // Add one to the total amount of stuff we have to fetch
+                        allRessources++;
+
+                        // That promise is fulfilled once one resource is done fetching
+                        // When this happens we update the progress bar
+                        fetchResources.then((_) => {
+                            // When fetching is done, indicate this in our loading bar
+                            loadedCount++;
+                            const percentLoaded = 100 * loadedCount / allRessources;
+                            const progressbar = document.getElementById('progressbar');
+                            progressbar.value = percentLoaded;
+                        });
+
+                        return fetchResources;
+                    }
+            });
+        }
+
+        // Invoke the pipeline
+        StartBlazor();
+    </script>
+</body>
+</html>

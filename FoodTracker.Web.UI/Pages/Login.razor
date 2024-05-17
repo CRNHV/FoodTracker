@@ -1,0 +1,111 @@
+﻿@using System.Text.Json
+@using FoodTracker.Web.UI.Layout
+@using Microsoft.AspNetCore.Components.Authorization
+@using FoodTracker.Web.UI.Models.Login
+@using FoodTracker.Web.UI.Services
+@using FoodTracker.Web.UI.Services.Login;
+@attribute [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+
+@layout LoginLayout
+@inject ILocalStorageService localStorage;
+@inject NavigationManager manager;
+@inject IHttpClientFactory clientFactory;
+
+<div class="container is-desktop is-mobile" style="margin-top: 200px;">
+    <div class="columns is-centered is-mobile is-multiline">
+        @if (ErrorMessage != null)
+        {
+            <div class="column is-9">
+                <div class="notification is-warning">
+                    @ErrorMessage
+                </div>
+            </div>
+        }
+
+        @if (IsLoggedIn)
+        {
+            <div class="notification is-success">
+                <strong>Hey,  welcome  back!</strong>
+            </div>
+        }
+
+        <div class="column is-9">
+
+            <form @onsubmit="Submit">
+                <AntiforgeryToken />
+                <div class="field">
+                    <label class="label">Username</label>
+                    <div class="@(IsLoading ? "control is-loading" : "control")">
+                        <input @bind-value="Model!.Username" class="input has-text-white" type="text" placeholder="Login">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Password</label>
+                    <div class="@(IsLoading ? "control is-loading" : "control")">
+                        <input @bind-value="Model!.Password" class="input has-text-white" type="password" placeholder="Password">
+                    </div>
+                </div>
+
+                @if (!IsLoading)
+                {
+                    <div class="field is-grouped">
+                        <div class="control is-expanded">
+                            <button type="submit" class="button is-dark has-text-success is-fullwidth">Login</button>
+                        </div>
+                    </div>
+                }
+            </form>
+
+        </div>
+    </div>
+</div>
+@code {
+    [SupplyParameterFromForm]
+    public LoginModel? Model { get; set; }
+
+    public string? ErrorMessage { get; set; }
+    private HttpClient Client;
+
+    private bool IsLoading = false;
+    private bool IsLoggedIn = false;
+
+    protected override void OnInitialized()
+    {
+        Model ??= new();
+        Client = clientFactory.CreateClient("WebAPI");
+    }
+
+    private async Task Submit(EventArgs e)
+    {
+        if (Model.IsEmpty)
+        {
+            ErrorMessage = "Provide an username or password.";
+            return;
+        }
+
+        IsLoading = true;
+
+        var loginResult = await Client.PostAsJsonAsync<LoginModel>("Authentication/Login", Model);
+        if (!loginResult.IsSuccessStatusCode)
+        {
+            ErrorMessage = "Unable to login.";
+            return;
+        }
+
+        var loginResponseData = await loginResult.Content.ReadAsStringAsync();
+        var jwtTokenData = JsonSerializer.Deserialize<JwtToken>(loginResponseData);
+        if (jwtTokenData == null || string.IsNullOrEmpty(jwtTokenData.Token))
+        {
+            ErrorMessage = "An error occured while logging in.";
+            return;
+        }
+
+        IsLoading = false;
+        IsLoggedIn = true;
+
+        await Task.Delay(5000);
+        await localStorage.SetItem<JwtToken>("token", jwtTokenData);
+        manager.Refresh();
+    }
+}

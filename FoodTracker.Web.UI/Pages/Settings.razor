@@ -1,0 +1,103 @@
+﻿@page "/settings"
+@using FoodTracker.Web.UI.Models.Settings
+@using FoodTracker.Web.UI.Services.Settings;
+
+@inject ISettingsService settings;
+
+<div class="container is-desktop is-mobile">
+    <div class="columns is-multiline">
+        @if (ErrorMessage != null)
+        {
+            <div class="column is-12">
+                <div class="notification is-warning">
+                    @ErrorMessage
+                </div>
+            </div>
+        }
+        @if (Notification != null)
+        {
+            <div class="column is-12">
+                <div class="notification is-success">
+                    @Notification
+                </div>
+            </div>
+        }
+
+        <div class="column is-12">
+
+            <form @onsubmit="Submit">
+                <AntiforgeryToken />
+                <div class="field">
+                    <label class="label">Target daily energy intake</label>
+                    <div class="control">
+                        <input @bind-value="Model!.EnergyGoal" class="input has-text-white" type="number" placeholder="Enter desired energy goal">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Target daily protein intake</label>
+                    <div class="control">
+                        <input @bind-value="Model!.ProteinGoal" class="input has-text-white" type="number" placeholder="Enter desired protein goal">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Target daily fat intake</label>
+                    <div class="control">
+                        <input @bind-value="Model!.FatGoal" class="input has-text-white" type="number" placeholder="Enter desired fat goal">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Target daily carb intake</label>
+                    <div class="control">
+                        <input @bind-value="Model!.CarbGoal" class="input has-text-white" type="number" placeholder="Enter desired carb goal">
+                    </div>
+                </div>
+
+                <div class="field is-grouped">
+                    <div class="control is-expanded">
+                        <button type="submit" class="button is-dark has-text-success is-fullwidth">Save</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@code {
+    public string? ErrorMessage { get; set; }
+    public string? Notification { get; set; }
+
+    [SupplyParameterFromForm]
+    public UserSettingsModel? Model { get; set; } = new UserSettingsModel();
+
+    private async Task Submit(EventArgs e)
+    {
+        if (Model != null)
+        {
+            var result = await settings.CreateOrUpdateAsync(Model);
+            if (!result.IsSuccess)
+            {
+                ErrorMessage = result.Errors.First();
+            }
+            else
+            {
+                Notification = "Succesfully updated settings.";
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userSettings = await settings.GetForUserAsync();
+        if (userSettings.IsSuccess)
+        {
+            Model = new UserSettingsModel();
+
+            Model.FatGoal = userSettings?.Data?.FatGoal ?? 0;
+            Model.ProteinGoal = userSettings?.Data?.ProteinGoal ?? 0;
+            Model.CarbGoal = userSettings?.Data?.CarbGoal ?? 0;
+            Model.EnergyGoal = userSettings?.Data?.EnergyGoal ?? 0;
+        }
+    }
+}
