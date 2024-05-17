@@ -1,0 +1,3 @@
+[submodule "FoodTracker.Providers.VoedingCentrum"]
+	path = FoodTracker.Providers.VoedingCentrum
+	url = https://github.com/CRNHV/FoodTracker.Providers.VoedingCentrum
