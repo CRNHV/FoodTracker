@@ -6,5 +6,6 @@ namespace FoodTracker.Contracts.Persistence;
 public interface IRegistrationTokenRepository
 {
     Task<IRegistrationTokenEntity> CreateTokenAsync();
-    Task<IRegistrationTokenEntity> GetRegistrationTokenAsync(Guid tokenId);
+    Task<IRegistrationTokenEntity?> GetRegistrationTokenAsync(Guid tokenId);
+    Task SetTokenUsedAsync(Guid tokenId);
 }

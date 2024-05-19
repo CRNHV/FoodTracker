@@ -6,5 +6,6 @@ namespace FoodTracker.Contracts.Application.User;
 public interface IRegistrationTokens
 {
     Task<IRegistrationToken> CreateTokenAsync();
-    Task<IRegistrationToken> GetTokenAsync(Guid tokenId);
+    Task<IRegistrationToken?> GetTokenAsync(Guid tokenId);
+    Task SetTokenUsedAsync(Guid tokenId);
 }
