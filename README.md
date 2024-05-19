@@ -32,6 +32,3 @@ In order to build and run the application you need the following:
         - Contains the blazor wasm project.
     - ZXingBlazor
         - Contains the blazor component for the barcode scanner, original repo is https://github.com/densen2014/ZXingBlazor
-
-## The provider
-This project has been build with an API which isn't public. As such the provider implementation is a private repository.
