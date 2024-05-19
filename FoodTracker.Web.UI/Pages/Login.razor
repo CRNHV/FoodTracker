@@ -90,6 +90,7 @@
         if (!loginResult.IsSuccessStatusCode)
         {
             ErrorMessage = "Unable to login.";
+            IsLoading = false;
             return;
         }
 
@@ -98,6 +99,7 @@
         if (jwtTokenData == null || string.IsNullOrEmpty(jwtTokenData.Token))
         {
             ErrorMessage = "An error occured while logging in.";
+            IsLoading = false;
             return;
         }
 
