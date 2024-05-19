@@ -1,19 +1,18 @@
-﻿@attribute [AllowAnonymous]
-@page "/login"
-@layout LoginLayout
+﻿@page "/register"
+@attribute [AllowAnonymous]
 
 @using System.Text.Json
 @using FoodTracker.Web.UI.Layout
-@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using FoodTracker.Web.UI.Models.Login
 @using FoodTracker.Web.UI.Services
 @using FoodTracker.Web.UI.Services.Login;
 
 
-@inject ILocalStorageService localStorage;
+@layout LoginLayout
 @inject NavigationManager manager;
 @inject IHttpClientFactory clientFactory;
+@inject ILocalStorageService localStorage;
 
 <div class="container is-desktop is-mobile" style="margin-top: 200px;">
     <div class="columns is-centered is-mobile is-multiline">
@@ -25,22 +24,31 @@
                 </div>
             </div>
         }
-
-        @if (IsLoggedIn)
+        else if (!IsLoading && ErrorMessage != null)
         {
-            <div class="notification is-success">
-                <strong>Hey,  welcome  back!</strong>
+            <div class="column is-9">
+                <div class="notification is-success">
+                    @ErrorMessage
+                </div>
             </div>
         }
+
 
         <div class="column is-9">
 
             <form @onsubmit="Submit">
                 <AntiforgeryToken />
                 <div class="field">
+                    <label class="label">Registration token</label>
+                    <div class="@(IsLoading ? "control is-loading" : "control")">
+                        <input @bind-value="Model!.Token" class="input has-text-white" type="text" placeholder="Registration token">
+                    </div>
+                </div>
+
+                <div class="field">
                     <label class="label">Username</label>
                     <div class="@(IsLoading ? "control is-loading" : "control")">
-                        <input @bind-value="Model!.Username" class="input has-text-white" type="text" placeholder="Login">
+                        <input @bind-value="Model!.Username" class="input has-text-white" type="text" placeholder="Username">
                     </div>
                 </div>
 
@@ -55,13 +63,8 @@
                 {
                     <div class="field is-grouped">
                         <div class="control is-expanded">
-                            <button type="submit" class="button is-dark has-text-success is-fullwidth">Login</button>
+                            <button type="submit" class="button is-dark has-text-success is-fullwidth">Register</button>
                         </div>
-                    </div>
-                    <div class="field is-grouped">
-                        <a class="button is-dark has-text-success is-fullwidth" href="/register">
-                            Register
-                        </a>
                     </div>
                 }
             </form>
@@ -71,7 +74,7 @@
 </div>
 @code {
     [SupplyParameterFromForm]
-    public LoginModel? Model { get; set; }
+    public RegistrationModel? Model { get; set; }
 
     public string? ErrorMessage { get; set; }
     private HttpClient Client;
@@ -87,35 +90,35 @@
 
     private async Task Submit(EventArgs e)
     {
-        if (Model.IsEmpty)
+        if (Model == null || Model.IsEmpty)
         {
-            ErrorMessage = "Provide an username or password.";
+            ErrorMessage = "Please fill in the registration form.";
             return;
         }
 
         IsLoading = true;
 
-        var loginResult = await Client.PostAsJsonAsync<LoginModel>("Authentication/Login", Model);
+        var loginResult = await Client.PostAsJsonAsync<RegistrationModel>("Authentication/Register", Model);
         if (!loginResult.IsSuccessStatusCode)
         {
-            ErrorMessage = "Unable to login.";
+            ErrorMessage = "Unable to register.";
             IsLoading = false;
             return;
         }
 
         var loginResponseData = await loginResult.Content.ReadAsStringAsync();
-        Console.WriteLine(loginResponseData);
         var jwtTokenData = JsonSerializer.Deserialize<JwtToken>(loginResponseData);
         if (jwtTokenData == null || string.IsNullOrEmpty(jwtTokenData.Token))
         {
-            ErrorMessage = "An error occured while logging in.";
+            ErrorMessage = "Succesfully registered. You may now log in!";
             IsLoading = false;
+            await Task.Delay(5000);
+            manager.NavigateTo("/login", true);
             return;
         }
 
         IsLoading = false;
-        IsLoggedIn = true;
-
+        ErrorMessage = "Succesfully registered. You will be logged in shortly.";
         await Task.Delay(5000);
         await localStorage.SetItem<JwtToken>("token", jwtTokenData);
         manager.NavigateTo("/", true);

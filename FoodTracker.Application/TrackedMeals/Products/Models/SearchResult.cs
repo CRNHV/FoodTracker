@@ -1,6 +1,6 @@
 ﻿using FoodTracker.Data.Domain.Application.Product;
 
-namespace FoodTracker.Application.Products.Models;
+namespace FoodTracker.Application.TrackedMeals.Products.Models;
 
 internal sealed class SearchResult : ISearchResult
 {

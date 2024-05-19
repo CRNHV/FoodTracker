@@ -7,6 +7,6 @@ using System.Threading.Tasks;
 namespace FoodTracker.Data.Domain.Application.User;
 public interface IRegistrationToken
 {
-    public Guid Token { get; set; }
-    public bool IsUsed { get; set; }
+    public Guid Token { get; init; }
+    public bool IsUsed { get; init; }
 }

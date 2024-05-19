@@ -1,7 +1,7 @@
 ﻿using FoodTracker.Data.Domain.Application.Product;
 using System.Collections.Generic;
 
-namespace FoodTracker.Application.Products.Models;
+namespace FoodTracker.Application.TrackedMeals.Products.Models;
 
 internal sealed class BaseProduct : IBaseProduct
 {
