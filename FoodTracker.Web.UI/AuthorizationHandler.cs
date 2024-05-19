@@ -35,8 +35,6 @@ public class AuthorizationHandler : DelegatingHandler
         }
         catch (Exception)
         {
-            // Redirect to the login page or perform any logout action
-            _navigationManager.NavigateTo("/", true);
             throw;
         }
     }
