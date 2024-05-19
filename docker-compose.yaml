@@ -1,10 +1,6 @@
-version: '3.8'
-
 services:
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile.api
+    image: ucciregistry.azurecr.io/foodtracker-api
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__FoodTrackerDb=Server=db;Database=FoodTracker;Trusted_Connection=False;User=sa;Password=YourStrong@Passw0rd;encrypt=false
@@ -16,16 +12,14 @@ services:
       - app-network
 
   ui:
-    build:
-      context: .
-      dockerfile: Dockerfile.ui
+    image: ucciregistry.azurecr.io/foodtracker-webui
     networks:
       - app-network
     volumes:
       - ui-build:/app
 
   db:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+    image: ucciregistry.azurecr.io/foodtracker-db
     environment:
       SA_PASSWORD: "YourStrong@Passw0rd"
       ACCEPT_EULA: "Y"
@@ -37,7 +31,7 @@ services:
       - app-network
 
   nginx:
-    image: nginx:latest
+    image: ucciregistry.azurecr.io/foodtracker-nginx
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ui-build:/usr/share/nginx/html:ro
