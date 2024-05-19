@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace FoodTracker.Application.User;
 internal class RegistrationTokenService : IRegistrationTokens
 {
-    private IRegistrationTokenRepository _repository;
+    private readonly IRegistrationTokenRepository _repository;
 
     public RegistrationTokenService(IRegistrationTokenRepository repository)
     {
@@ -21,9 +21,16 @@ internal class RegistrationTokenService : IRegistrationTokens
         return token.ToDomain();
     }
 
-    public async Task<IRegistrationToken> GetTokenAsync(Guid tokenId)
+    public async Task<IRegistrationToken?> GetTokenAsync(Guid tokenId)
     {
         var registrationToken = await _repository.GetRegistrationTokenAsync(tokenId);
+        if (registrationToken == null)
+            return null;
         return registrationToken.ToDomain();
+    }
+
+    public async Task SetTokenUsedAsync(Guid tokenId)
+    {
+        await _repository.SetTokenUsedAsync(tokenId);
     }
 }
