@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace FoodTracker.Application.Extensions.Mappings;
 
-public static class ProductMappings
+internal static class ProductMappings
 {
     public static IBaseProduct EntityToDomainModel(this IBaseProductEntity data)
     {
