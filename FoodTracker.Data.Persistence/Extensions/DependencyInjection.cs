@@ -8,6 +8,8 @@ using FoodTracker.Provider.VoedingCentrum;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Threading.Tasks;
 
 namespace FoodTracker.Data.Persistence.Extensions;
 
@@ -34,5 +36,34 @@ public static class DependencyInjection
     {
         provider.AddHttpClient();
         provider.AddScoped<IFoodDataProvider, VoedingAPI>();
+    }
+
+    public static async Task RunDbMigrations(this IServiceProvider provider)
+    {
+        using (var scope = provider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetService<FoodTrackerDbContext>();
+            if (context is null)
+                throw new Exception("Unable to get context from ServiceProvider");
+            context.Database.Migrate();
+
+            var appHasUsers = await context.Users.AnyAsync();
+            var appHasRegistrationTokens = await context.RegistrationTokens.AnyAsync();
+            if (!appHasUsers && !appHasRegistrationTokens)
+            {
+                var token = Guid.NewGuid();
+                var currentDtUtc = DateTime.UtcNow;
+
+                await context.RegistrationTokens.AddAsync(new RegistrationTokenEntity()
+                {
+                    CreatedOnUtc = currentDtUtc,
+                    LastUpdatedOnUtc = currentDtUtc,
+                    Token = token
+                });
+
+                await context.SaveChangesAsync();
+                await Console.Out.WriteLineAsync($"One time registration token: {token}");
+            }
+        }
     }
 }
