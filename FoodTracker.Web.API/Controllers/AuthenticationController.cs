@@ -97,7 +97,7 @@ public sealed class AuthenticationController : ControllerBase
 
     [HttpPost("Token")]
     [Authorize]
-    public async Task<IActionResult> CreateToken()
+    public async Task<IActionResult> CreateRegistrationToken()
     {
         Guid requestId = Guid.NewGuid();
         var userId = HttpContext.User.GetClaimWithType(ClaimTypes.NameIdentifier).First();
