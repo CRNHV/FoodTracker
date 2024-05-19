@@ -7,8 +7,6 @@
 @using FoodTracker.Web.UI.Services
 @using FoodTracker.Web.UI.Services.Login
 
-@attribute [Microsoft.AspNetCore.Authorization.AllowAnonymous]
-
 @layout LoginLayout
 
 @inject NavigationManager manager;
@@ -43,6 +41,6 @@
         gifLink = catGifs[rng.Next(0, catGifs.Length)];
         await _localStorageService.RemoveItem("token");
         await Task.Delay(5000);
-        manager.NavigateTo("/", true);
+        manager.NavigateTo("/Login", true);
     }
 }

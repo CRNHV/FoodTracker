@@ -1,8 +1,10 @@
 ﻿using FoodTracker.Contracts.Application.User;
+using FoodTracker.Data.Domain.Application.Authentication;
 using FoodTracker.Data.Persistence.Entities.User;
 using FoodTracker.Web.API.Extensions;
 using FoodTracker.Web.API.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -26,6 +28,10 @@ public sealed class AuthenticationController : ControllerBase
     private readonly IConfiguration _config;
     private readonly IRegistrationTokens _registrationTokens;
 
+    private readonly string? JwtAudience;
+    private readonly string? JwtIssuer;
+    private readonly string? JwtSecret;
+
     public AuthenticationController(ILogger<AuthenticationController> logger,
                                     UserManager<User> userManager,
                                     SignInManager<User> signInManager,
@@ -37,6 +43,10 @@ public sealed class AuthenticationController : ControllerBase
         _signInManager = signInManager;
         _config = config;
         _registrationTokens = registrationTokens;
+
+        JwtAudience = _config["JWT:ValidAudience"];
+        JwtIssuer = _config["JWT:ValidIssuer"];
+        JwtSecret = _config["JWT:Secret"];
     }
 
     [HttpPost("Login")]
@@ -47,9 +57,7 @@ public sealed class AuthenticationController : ControllerBase
 
         _logger.LogInformation("Username: {username} started request: {requestId}", request.Username, requestId);
 
-        var audience = _config["JWT:ValidAudience"];
-        var issuer = _config["JWT:ValidIssuer"];
-        var secret = _config["JWT:Secret"];
+
 
         var user = await _userManager.FindByNameAsync(request.Username);
         if (user is null)
@@ -65,31 +73,19 @@ public sealed class AuthenticationController : ControllerBase
             return Unauthorized();
         }
 
-        SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)); // Replace with your actual secret key
-        SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var claims = await _userManager.GetClaimsAsync(user);
-        if (claims == null || claims.Count == 0)
+        var token = await GenerateTokenAsync(user);
+        if (token is null)
+        {
+            _logger.LogInformation("{requestId} | unable to generate token for {username}", requestId, request.Username);
             return Unauthorized();
-
-        JwtSecurityToken tokenGenerator = new JwtSecurityToken(
-            issuer: issuer, // Replace with your issuer
-            audience: audience, // Replace with your audience
-            expires: DateTime.UtcNow.AddMinutes(120), // Token expiration time
-            signingCredentials: creds,
-            claims: claims
-        );
-
-        JwtSecurityTokenHandler tokenresult = new JwtSecurityTokenHandler();
-        string token = tokenresult.WriteToken(tokenGenerator);
+        }
 
         _logger.LogInformation("{requestId} | {username} logged in succesfully", requestId, request.Username);
-
         return Ok(new { Token = token });
     }
 
     [HttpPost("Logout")]
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> Logout()
     {
         Guid requestId = Guid.NewGuid();
@@ -99,7 +95,7 @@ public sealed class AuthenticationController : ControllerBase
         return Ok();
     }
 
-    [HttpPost("token")]
+    [HttpPost("Token")]
     [Authorize]
     public async Task<IActionResult> CreateToken()
     {
@@ -160,6 +156,41 @@ public sealed class AuthenticationController : ControllerBase
         await _userManager.AddClaimAsync(createdUser, new Claim(ClaimTypes.Role, "user"));
         await _userManager.AddClaimAsync(createdUser, new Claim(ClaimTypes.Name, newUser.UserName));
         await _userManager.AddClaimAsync(createdUser, new Claim(ClaimTypes.NameIdentifier, newUser.Id.ToString()));
-        return Ok();
+
+        var loginToken = await GenerateTokenAsync(createdUser);
+        if (loginToken is null)
+        {
+            return Ok(new
+            {
+                Token = string.Empty
+            });
+        }
+
+        return Ok(new
+        {
+            Token = loginToken
+        });
+    }
+
+    private async Task<string?> GenerateTokenAsync(User user)
+    {
+        SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSecret)); // Replace with your actual secret key
+        SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var claims = await _userManager.GetClaimsAsync(user);
+        if (claims == null || claims.Count == 0)
+            return null;
+
+        JwtSecurityToken tokenGenerator = new JwtSecurityToken(
+            issuer: JwtIssuer, // Replace with your issuer
+            audience: JwtAudience, // Replace with your audience
+            expires: DateTime.UtcNow.AddMinutes(120), // Token expiration time
+            signingCredentials: creds,
+            claims: claims
+        );
+
+        JwtSecurityTokenHandler tokenresult = new JwtSecurityTokenHandler();
+        string token = tokenresult.WriteToken(tokenGenerator);
+        return token;
     }
 }

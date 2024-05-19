@@ -10,7 +10,7 @@ internal static class RegistrationTokenMapping
         return new RegistrationToken()
         {
             Token = entity.Token,
-            IsUsed = entity.CreatedOnUtc == entity.LastUpdatedOnUtc,
+            IsUsed = entity.CreatedOnUtc != entity.LastUpdatedOnUtc,
         };
     }
 }

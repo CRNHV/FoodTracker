@@ -14,6 +14,7 @@
     <ProjectReference Include="..\FoodTracker.Contracts\FoodTracker.Contracts.csproj" />
     <ProjectReference Include="..\FoodTracker.Data.Domain\FoodTracker.Data.Domain.csproj" />
     <ProjectReference Include="..\FoodTracker.Data.Persistence\FoodTracker.Data.Persistence.csproj" />
+    <ProjectReference Include="..\FoodTracker.Providers.VoedingCentrum\FoodTracker.Provider.VoedingCentrum\FoodTracker.Provider.VoedingCentrum.csproj" />
   </ItemGroup>
 
 </Project>

@@ -21,6 +21,7 @@ public static class DependencyInjection
         provider.AddScoped<IDataUpdater, ProductUpdater>();
         provider.AddScoped<IProductTrackerRepository, ProductTrackerRepository>();
         provider.AddScoped<ISettingsRepository, UserSettingsRepository>();
+        provider.AddScoped<IRegistrationTokenRepository, RegistrationTokenRepository>();
 
         provider
             .AddIdentityCore<User>()
@@ -31,13 +32,7 @@ public static class DependencyInjection
             );
     }
 
-    public static void AddProvider(this IServiceCollection provider)
-    {
-        provider.AddHttpClient();
-        provider.AddScoped<IFoodDataProvider, VoedingAPI>();
-    }
-
-    public static void RunDbMigrations(this IServiceProvider provider)
+    public static async void RunDbMigrations(this IServiceProvider provider)
     {
         using (var scope = provider.CreateScope())
         {
@@ -46,6 +41,24 @@ public static class DependencyInjection
                 throw new Exception("Unable to get context from ServiceProvider");
             context.Database.Migrate();
 
+            var appHasUsers = await context.Users.AnyAsync();
+            var appHasRegistrationTokens = await context.RegistrationTokens.AnyAsync();
+            if (!appHasUsers && !appHasRegistrationTokens)
+            {
+                var token = Guid.NewGuid();
+                var currentDtUtc = DateTime.UtcNow;
+
+                await context.RegistrationTokens.AddAsync(new RegistrationTokenEntity()
+                {
+                    CreatedOnUtc = currentDtUtc,
+                    LastUpdatedOnUtc = currentDtUtc,
+                    Token = token
+                });
+
+                await context.SaveChangesAsync();
+
+                await Console.Out.WriteLineAsync($"One time registration token: {token}");
+            }
         }
     }
 }

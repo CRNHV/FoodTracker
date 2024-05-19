@@ -1,6 +1,7 @@
 using FoodTracker.Web.UI.Services;
 using FoodTracker.Web.UI.Services.Home;
 using FoodTracker.Web.UI.Services.Settings;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -35,13 +36,21 @@ public class Program
         }).AddHttpMessageHandler<AuthorizationHandler>();
 
         builder.Services.AddScoped<IFoodTrackService, FoodTrackService>();
-        builder.Services.AddCascadingAuthenticationState();
-        builder.Services.AddOptions();
-        builder.Services.AddAuthorizationCore();
-        builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
-        builder.Services.AddScoped<ILocalStorageService, LocalStorageService>();
         builder.Services.AddScoped<ISettingsService, SettingsService>();
 
+        // Authentication and Authorization
+        builder.Services.AddScoped<ILocalStorageService, LocalStorageService>();
+        builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();        
+        builder.Services.AddAuthorizationCore(options =>
+        {
+            options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .Build();
+        });
+        builder.Services.AddCascadingAuthenticationState();
+        builder.Services.AddOptions();
+                
+        
         var host = builder.Build();
         var services = host.Services;
 

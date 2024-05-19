@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using System;
 using System.Linq;
 using System.Text;
 
@@ -75,7 +76,7 @@ public class Program
                               policy =>
                               {
                                   policy
-                                    .WithOrigins(origins)
+                                    .AllowAnyOrigin()
                                     .AllowAnyHeader()
                                     .AllowAnyMethod();
                               });

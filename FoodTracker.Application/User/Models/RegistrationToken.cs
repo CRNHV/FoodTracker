@@ -3,7 +3,7 @@ using System;
 
 namespace FoodTracker.Application.User.Models;
 internal class RegistrationToken : IRegistrationToken
-{    
-    public Guid Token { get; set; }
-    public bool IsUsed { get; set; }
+{
+    public Guid Token { get; init; }
+    public bool IsUsed { get; init; }
 }

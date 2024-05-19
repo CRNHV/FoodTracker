@@ -49,14 +49,3 @@
 
     </script>
 </body>
-
-@code {
-    protected override async Task OnInitializedAsync()
-    {
-        var token = await _localStorage.GetItem<JwtToken>("token");
-        if (token == null || string.IsNullOrEmpty(token.Token))
-        {
-            navigationManager.NavigateTo("/Logout");
-        }
-    }
-}
