@@ -1,6 +1,7 @@
 using FoodTracker.Application.Extensions;
 using FoodTracker.Data.Persistence.Context;
 using FoodTracker.Data.Persistence.Entities.User;
+using FoodTracker.Data.Persistence.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -81,6 +82,8 @@ public class Program
         });
 
         var app = builder.Build();
+
+        app.Services.RunDbMigrations();
 
         // Configure the HTTP request pipeline.
 

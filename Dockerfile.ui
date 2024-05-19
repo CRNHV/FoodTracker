@@ -1,0 +1,14 @@
+# Stage 1: Build the Blazor WASM app
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copy the entire solution
+COPY . .
+
+# Restore dependencies and publish the Blazor WASM project
+RUN dotnet publish ./FoodTracker.Web.UI/FoodTracker.Web.UI.csproj -c Release -o /app/publish
+
+# Stage 2: Minimal runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=build /app/publish .

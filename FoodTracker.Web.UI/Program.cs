@@ -15,11 +15,23 @@ public class Program
         builder.RootComponents.Add<App>("#app");
         builder.RootComponents.Add<HeadOutlet>("head::after");
 
+        if (!builder.HostEnvironment.IsDevelopment())
+        {
+            builder.Logging.SetMinimumLevel(LogLevel.None);
+        }
+
+        var baseAddress = builder.Configuration.GetValue<string>("BaseAddress");
+
+        if (baseAddress is null)
+        {
+            return;
+        }
+
         builder.Services.AddScoped<AuthorizationHandler>();
 
         builder.Services.AddHttpClient("WebAPI", conf =>
         {
-            conf.BaseAddress = new Uri("https://localhost:7281");
+            conf.BaseAddress = new Uri(baseAddress);
         }).AddHttpMessageHandler<AuthorizationHandler>();
 
         builder.Services.AddScoped<IFoodTrackService, FoodTrackService>();
