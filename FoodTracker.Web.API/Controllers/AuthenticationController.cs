@@ -1,4 +1,5 @@
-﻿using FoodTracker.Data.Persistence.Entities.User;
+﻿using FoodTracker.Contracts.Application.User;
+using FoodTracker.Data.Persistence.Entities.User;
 using FoodTracker.Web.API.Extensions;
 using FoodTracker.Web.API.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -23,16 +24,19 @@ public sealed class AuthenticationController : ControllerBase
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly IConfiguration _config;
+    private readonly IRegistrationTokens _registrationTokens;
 
     public AuthenticationController(ILogger<AuthenticationController> logger,
                                     UserManager<User> userManager,
                                     SignInManager<User> signInManager,
-                                    IConfiguration config)
+                                    IConfiguration config,
+                                    IRegistrationTokens registrationTokens)
     {
         _logger = logger;
         _userManager = userManager;
         _signInManager = signInManager;
         _config = config;
+        _registrationTokens = registrationTokens;
     }
 
     [HttpPost("Login")]
@@ -95,13 +99,42 @@ public sealed class AuthenticationController : ControllerBase
         return Ok();
     }
 
+    [HttpPost("token")]
+    [Authorize]
+    public async Task<IActionResult> CreateToken()
+    {
+        Guid requestId = Guid.NewGuid();
+        var userId = HttpContext.User.GetClaimWithType(ClaimTypes.NameIdentifier).First();
+        _logger.LogInformation("Username: {userId} started request: {requestId}", userId.Value, requestId);
+
+        var token = await _registrationTokens.CreateTokenAsync();
+        if (token.Token == Guid.Empty)
+        {
+            return BadRequest();
+        }
+
+        _logger.LogInformation("{requestId} | created token: {token}", requestId, token.Token);
+
+        return Ok(new
+        {
+            token.Token,
+        });
+    }
+
     [HttpPost("Register")]
     [AllowAnonymous]
-    public async Task<IActionResult> Register([FromBody] AuthenticationRequest request)
+    public async Task<IActionResult> Register([FromBody] RegistrationRequest request)
     {
         Guid requestId = Guid.NewGuid();
 
         _logger.LogInformation("Started request: {requestId}, parameters: username={username}", requestId, request.Username);
+
+        var token = await _registrationTokens.GetTokenAsync(request.Token);
+        if (token is null || token.IsUsed || token.Token == Guid.Empty)
+        {
+            _logger.LogInformation("{requestId} | supplied token {tokenId} by {username} is already used.", requestId, request.Token, request.Username);
+            return Unauthorized();
+        }
 
         var newUser = new User();
         newUser.UserName = request.Username;
@@ -119,6 +152,8 @@ public sealed class AuthenticationController : ControllerBase
             _logger.LogInformation("{requestId} | user with {username} could not be found after creation", requestId, request.Username);
             return Unauthorized();
         }
+
+        await _registrationTokens.SetTokenUsedAsync(request.Token);
 
         _logger.LogInformation("{requestId} | {username} registered succesfully", requestId, request.Username);
 
