@@ -25,7 +25,7 @@ public class AuthorizationHandler : DelegatingHandler
         {
             var response = await base.SendAsync(request, cancellationToken);
 
-            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized && token != null)
             {
                 // Redirect to the login page or perform any logout action
                 _navigationManager.NavigateTo("/Logout", true);
