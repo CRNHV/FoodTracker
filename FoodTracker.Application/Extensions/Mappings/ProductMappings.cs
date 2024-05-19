@@ -1,4 +1,4 @@
-﻿using FoodTracker.Application.Products.Models;
+﻿using FoodTracker.Application.TrackedMeals.Products.Models;
 using FoodTracker.Data.Domain.Application.Product;
 using FoodTracker.Data.Domain.Persistence.Product;
 using System.Collections.Generic;
