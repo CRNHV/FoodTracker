@@ -8,6 +8,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__FoodTrackerDb=Server=db;Database=FoodTracker;Trusted_Connection=False;User=sa;Password=YourStrong@Passw0rd;encrypt=false
+    ports:
+      - 8080:8080
     depends_on:
       - db
     networks:
@@ -40,7 +42,7 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ui-build:/usr/share/nginx/html:ro
     ports:
-      - "80:80"
+      - "8181:80"
     depends_on:
       - api
       - ui
