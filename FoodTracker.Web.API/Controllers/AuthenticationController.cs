@@ -97,10 +97,9 @@ public sealed class AuthenticationController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Register([FromBody] AuthenticationRequest request)
     {
-        var userId = HttpContext.User.GetClaimWithType(ClaimTypes.NameIdentifier).First();
         Guid requestId = Guid.NewGuid();
 
-        _logger.LogInformation("UserId: {userId} started request: {requestId}, parameters: username={username}", userId.Value, requestId, request.Username);
+        _logger.LogInformation("Started request: {requestId}, parameters: username={username}", requestId, request.Username);
 
         var newUser = new User();
         newUser.UserName = request.Username;
@@ -108,7 +107,7 @@ public sealed class AuthenticationController : ControllerBase
         var identityUser = await _userManager.CreateAsync(newUser, request.Password);
         if (!identityUser.Succeeded)
         {
-            _logger.LogInformation("{requestId} | user with {username} could not be created by {userId}", requestId, request.Username, userId.Value);
+            _logger.LogInformation("{requestId} | user with {username} could not be created", requestId, request.Username);
             return Unauthorized(identityUser.Errors.Select(x => x.Description).ToList());
         }
 
