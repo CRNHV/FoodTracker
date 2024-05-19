@@ -19,6 +19,7 @@ public static class DependencyInjection
         provider.AddScoped<IDataUpdater, ProductUpdater>();
         provider.AddScoped<IProductTrackerRepository, ProductTrackerRepository>();
         provider.AddScoped<ISettingsRepository, UserSettingsRepository>();
+        provider.AddScoped<IRegistrationTokenRepository, RegistrationTokenRepository>();
 
         provider
             .AddIdentityCore<User>()
