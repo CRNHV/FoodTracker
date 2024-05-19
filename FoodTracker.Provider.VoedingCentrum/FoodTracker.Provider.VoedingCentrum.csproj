@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<TargetFramework>net8.0</TargetFramework>
+	<ImplicitUsings>disable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\FoodTracker.Contracts\FoodTracker.Contracts.csproj" />
+		<ProjectReference Include="..\FoodTracker.Data.Domain\FoodTracker.Data.Domain.csproj" />
+	</ItemGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+  </ItemGroup>
+
+</Project>
