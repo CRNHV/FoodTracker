@@ -34,7 +34,7 @@ public sealed class SettingsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get()
     {
-        Guid requestId = new Guid();
+        Guid requestId = Guid.NewGuid();
         var userId = HttpContext.User.GetClaimWithType(ClaimTypes.NameIdentifier).First();
 
         _logger.LogInformation("UserId: {userId} started request: {requestId}", userId.Value, requestId);
@@ -52,7 +52,7 @@ public sealed class SettingsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateOrUpdate([FromBody] UserSettingsRequest request)
     {
-        Guid requestId = new Guid();
+        Guid requestId = Guid.NewGuid();
         var userId = HttpContext.User.GetClaimWithType(ClaimTypes.NameIdentifier).First();
         _logger.LogInformation("UserId: {userId} started request: {requestId} request params: {requestParams}", userId.Value, requestId, request);
 
