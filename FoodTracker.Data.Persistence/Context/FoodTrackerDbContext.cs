@@ -19,6 +19,7 @@ internal class FoodTrackerDbContext : IdentityDbContext<User, Role, int>
     public DbSet<ProductInfoEntity> ProductInfo { get; set; }
     public DbSet<TrackedMealEntity> TrackedMeals { get; set; }
     public DbSet<UserSettingsEntity> UserSettings { get; set; }
+    public DbSet<RegistrationTokenEntity> RegistrationTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
