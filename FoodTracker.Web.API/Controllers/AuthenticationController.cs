@@ -39,7 +39,7 @@ public sealed class AuthenticationController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Authorize([FromBody] AuthenticationRequest request)
     {
-        Guid requestId = new Guid();
+        Guid requestId = Guid.NewGuid();
 
         _logger.LogInformation("Username: {username} started request: {requestId}", request.Username, requestId);
 
@@ -50,14 +50,14 @@ public sealed class AuthenticationController : ControllerBase
         var user = await _userManager.FindByNameAsync(request.Username);
         if (user is null)
         {
-            _logger.LogWarning("{requestId} | Unable to login.", requestId);
+            _logger.LogWarning("{requestId} | Unable to login due to the username not found.", requestId);
             return Unauthorized();
         }
 
         var passwordCheck = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
         if (!passwordCheck.Succeeded)
         {
-            _logger.LogWarning("{requestId} | Unable to login.", requestId);
+            _logger.LogWarning("{requestId} | Unable to login due to a password mismatch", requestId);
             return Unauthorized();
         }
 
@@ -79,6 +79,8 @@ public sealed class AuthenticationController : ControllerBase
         JwtSecurityTokenHandler tokenresult = new JwtSecurityTokenHandler();
         string token = tokenresult.WriteToken(tokenGenerator);
 
+        _logger.LogInformation("{requestId} | {username} logged in succesfully", requestId, request.Username);
+
         return Ok(new { Token = token });
     }
 
@@ -86,7 +88,7 @@ public sealed class AuthenticationController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Logout()
     {
-        Guid requestId = new Guid();
+        Guid requestId = Guid.NewGuid();
         var userId = HttpContext.User.GetClaimWithType(ClaimTypes.NameIdentifier).First();
         _logger.LogInformation("Username: {userId} started request: {requestId}", userId.Value, requestId);
         await _signInManager.SignOutAsync();
@@ -117,6 +119,8 @@ public sealed class AuthenticationController : ControllerBase
             _logger.LogInformation("{requestId} | user with {username} could not be found after creation", requestId, request.Username);
             return Unauthorized();
         }
+
+        _logger.LogInformation("{requestId} | {username} registered succesfully", requestId, request.Username);
 
         await _userManager.AddClaimAsync(createdUser, new Claim(ClaimTypes.Role, "user"));
         await _userManager.AddClaimAsync(createdUser, new Claim(ClaimTypes.Name, newUser.UserName));
