@@ -1,15 +1,15 @@
 ﻿using FoodTracker.Application.Authentication;
 using FoodTracker.Application.TrackedMeals;
+using FoodTracker.Application.TrackedMeals.Products;
 using FoodTracker.Application.User;
 using FoodTracker.Contracts.Application.Authentication;
 using FoodTracker.Contracts.Application.Products;
 using FoodTracker.Contracts.Application.ProductTracking;
 using FoodTracker.Contracts.Application.User;
 using FoodTracker.Data.Persistence.Extensions;
+using FoodTracker.Provider.VoedingCentrum;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using FoodTracker.Provider.VoedingCentrum;
-using FoodTracker.Application.TrackedMeals.Products;
 
 namespace FoodTracker.Application.Extensions;
 

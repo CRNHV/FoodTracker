@@ -1,8 +1,6 @@
-﻿using FoodTracker.Data.Domain.Persistence;
-using FoodTracker.Data.Domain.Persistence.User;
+﻿using FoodTracker.Data.Domain.Persistence.User;
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FoodTracker.Data.Persistence.Entities.User;
 internal class RegistrationTokenEntity : IRegistrationTokenEntity

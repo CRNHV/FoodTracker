@@ -1,14 +1,11 @@
 using FoodTracker.Application.Extensions;
-using FoodTracker.Data.Persistence.Context;
 using FoodTracker.Data.Persistence.Entities.User;
-using FoodTracker.Data.Persistence.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using System;
 using System.Linq;
 using System.Text;
 
@@ -76,15 +73,13 @@ public class Program
                               policy =>
                               {
                                   policy
-                                    .AllowAnyOrigin()
+                                    .WithOrigins(origins)
                                     .AllowAnyHeader()
                                     .AllowAnyMethod();
                               });
         });
 
         var app = builder.Build();
-
-        app.Services.RunDbMigrations();
 
         // Configure the HTTP request pipeline.
 
