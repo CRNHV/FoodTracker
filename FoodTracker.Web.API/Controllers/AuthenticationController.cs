@@ -57,8 +57,6 @@ public sealed class AuthenticationController : ControllerBase
 
         _logger.LogInformation("Username: {username} started request: {requestId}", request.Username, requestId);
 
-
-
         var user = await _userManager.FindByNameAsync(request.Username);
         if (user is null)
         {
